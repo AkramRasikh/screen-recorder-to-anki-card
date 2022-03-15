@@ -34,28 +34,3 @@ chokidar
       if (err) console.log("ERROR: " + err);
     });
   });
-
-// video.setVideoSize('640x?', true, true, '#fff')
-
-// videos.forEach((videoPath) => {
-//   try {
-//     const process = new ffmpeg(`./old-videos/${videoPath}`);
-//     process.then(
-//       function (video) {
-//         video
-//           .setVideoSize("640x480", true, false)
-//           .save(`./new-videos/${videoPath}`, function (error, file) {
-//             if (!error) console.log("Video file: " + file);
-//           });
-//       },
-//       function (err) {
-//         console.log("Error: " + err);
-//       }
-//     );
-//   } catch (e) {
-//     console.log(e.code);
-//     console.log(e.msg);
-//   }
-// });
-// ffmpeg -i /Users/akramrasikh/Desktop/episode-10/$name -vf scale=720:-1 /Users/akramrasikh/Desktop/post-editted/$name
-// const ffmpeg = require("ffmpeg");

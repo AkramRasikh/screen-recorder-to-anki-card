@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon -L index.js"
+    "start": "nodemon -L index.js",
+    "edit": "node edit-videos.js",
+    "anki-collection": "node files-to-anki-collection.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +15,7 @@
     "chokidar": "^3.5.3",
     "dotenv": "^16.0.0",
     "ffmpeg": "^0.0.4",
+    "hidefile": "^3.0.0",
     "nodemon": "^2.0.15"
   },
   "devDependencies": {
