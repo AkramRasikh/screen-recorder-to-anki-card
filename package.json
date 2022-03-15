@@ -1,0 +1,24 @@
+{
+  "name": "media-converter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon -L index.js",
+    "delete-old-videos": "rm -r old-video",
+    "create-folder": "mkdir old-video",
+    "post-video-clear": "npm run delete-old-videos && npm run create-folder"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "dotenv": "^16.0.0",
+    "ffmpeg": "^0.0.4",
+    "nodemon": "^2.0.15"
+  },
+  "devDependencies": {
+    "eslint": "^8.11.0"
+  }
+}
