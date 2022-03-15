@@ -1,19 +1,13 @@
 const dotenv = require("dotenv");
 const fs = require("fs");
 const chokidar = require("chokidar");
-const videos = fs.readdirSync("./old-videos");
-const ffmpeg = require("ffmpeg");
-
-// const watcher = chokidar.watch('file, dir, glob, or array', {
-//   ignored: /(^|[\/\\])\../, // ignore dotfiles
-//   persistent: true
-// });
 
 dotenv.config();
 
-const filenamePrefix = "Diners-s02-e01";
-const preEdittedPath = process.env.DESKTOP_PATH + "/pre-" + `${filenamePrefix}`;
-const postEdittedPath = process.env.DESKTOP_PATH + "/" + `${filenamePrefix}`;
+const videoFolderName = process.env.npm_config_initial_folder;
+
+const preEdittedFilePath =
+  process.env.DESKTOP_PATH + "/pre-" + `${videoFolderName}`;
 
 const getNewFileName = (orginalPathToArr, numberOfVideos) => {
   const newPath = orginalPathToArr
@@ -21,15 +15,14 @@ const getNewFileName = (orginalPathToArr, numberOfVideos) => {
     .join("/");
   const newVideoIndex =
     numberOfVideos < 10 ? "0" + numberOfVideos : numberOfVideos;
-  console.log("newVideoIndex: ", newVideoIndex);
-  const newFilename = filenamePrefix + "-" + newVideoIndex + ".webm";
+  const newFilename = videoFolderName + "-" + newVideoIndex + ".webm";
   return `${newPath}/${newFilename}`;
 };
 
 chokidar
-  .watch(preEdittedPath, { ignoreInitial: true })
+  .watch(preEdittedFilePath, { ignoreInitial: true })
   .on("add", (event, _) => {
-    const numberOfVideos = fs.readdirSync(preEdittedPath).length;
+    const numberOfVideos = fs.readdirSync(preEdittedFilePath).length;
     const orginalPathToArr = event.split("/");
 
     const completeRenamedFile = getNewFileName(
@@ -65,3 +58,4 @@ chokidar
 //   }
 // });
 // ffmpeg -i /Users/akramrasikh/Desktop/episode-10/$name -vf scale=720:-1 /Users/akramrasikh/Desktop/post-editted/$name
+// const ffmpeg = require("ffmpeg");

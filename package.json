@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon -L index.js",
-    "delete-old-videos": "rm -r old-video",
-    "create-folder": "mkdir old-video",
-    "post-video-clear": "npm run delete-old-videos && npm run create-folder"
+    "start": "nodemon -L index.js"
   },
   "author": "",
   "license": "ISC",
