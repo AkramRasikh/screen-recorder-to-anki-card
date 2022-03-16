@@ -1,24 +1,39 @@
-const fs = require("fs");
 const dotenv = require("dotenv");
+const fs = require("fs");
 
 dotenv.config();
 
-const videoFolderName = process.env.npm_config_initial_folder;
-const postEdittedFilePath =
-  process.env.DESKTOP_PATH + "/post-" + `${videoFolderName}`;
+const videoFolderName =
+  process.env.npm_config_initial_folder || "post-Diners-s01-e10";
 
-const videos = fs.readdirSync(postEdittedFilePath);
-const filteredVideos = videos.filter((video) => video !== ".DS_Store");
+if (!videoFolderName) {
+  throw "Add a folder flag!!!!";
+}
 
-filteredVideos.forEach((videoPath) => {
-  fs.copyFile(
-    `${postEdittedFilePath}/${videoPath}`,
-    `${process.env.PATH_ANKI_MEDIA_COLLECTION}/${videoPath}`,
-    (err) => {
-      if (err) throw err;
+const initialFolderPath = process.env.DESKTOP_PATH + "/" + videoFolderName;
+
+const videosInCollection = fs.readdirSync(
+  process.env.PATH_ANKI_MEDIA_COLLECTION
+);
+const initialFolderPathFiles = fs
+  .readdirSync(initialFolderPath)
+  .filter((file) => file !== ".DS_Store" && !videosInCollection.includes(file));
+
+if (!!initialFolderPathFiles && initialFolderPathFiles.length === 0) {
+  throw "Nothing to send";
+}
+
+initialFolderPathFiles.forEach((video) => {
+  const absoluteVideoPath = initialFolderPath + "/" + video;
+  const collectionPath = process.env.PATH_ANKI_MEDIA_COLLECTION + "/" + video;
+  fs.copyFile(absoluteVideoPath, collectionPath, (err) => {
+    if (err) {
+      console.log("Error Found with: ", video, err);
+    } else {
       console.log(
-        `${postEdittedFilePath}/${videoPath} --> ${process.env.PATH_ANKI_MEDIA_COLLECTION}/${videoPath}`
+        "\nFile Contents of copied_file:",
+        fs.readFileSync(collectionPath, "utf8")
       );
     }
-  );
+  });
 });

@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -L index.js",
     "edit": "node edit-videos.js",
+    "rename": "node rename-files.js",
     "anki-collection": "node files-to-anki-collection.js"
   },
   "author": "",
