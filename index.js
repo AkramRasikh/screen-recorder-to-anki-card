@@ -8,6 +8,7 @@ const {
 const { compressFile } = require("./compress-file");
 const { fileToCollection } = require("./files-to-anki-collection");
 const { renameFile } = require("./rename-file");
+const { deleteFile } = require("./delete-file");
 
 dotenv.config();
 
@@ -58,8 +59,7 @@ chokidar
     );
 
     if (fileInCollection) {
-      console.log("File already exists in collection");
-      return;
+      return console.log("File already exists in collection");
     }
 
     const eventName = event.replace(" ", "").replace("(", "").replace(")", "");
@@ -68,6 +68,7 @@ chokidar
       await renameFile(event, eventName);
       await compressFile(event, completeRenamedFilePath);
       await fileToCollection(completeRenamedFilePath, videoFileName);
+      await deleteFile(event);
     } catch (error) {
       console.log("error: ", error);
     }

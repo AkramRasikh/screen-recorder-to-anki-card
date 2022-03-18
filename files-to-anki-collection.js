@@ -8,7 +8,7 @@ const fileToCollection = async (absoluteVideoPath, video) => {
         console.log("Error Found with: ", video, err);
         reject();
       } else {
-        console.log("\nFile Contents of copied_file:", video);
+        console.log("\nFile Contents of copied_file to collection:", video);
         resolve();
       }
     });
