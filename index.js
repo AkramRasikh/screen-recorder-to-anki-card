@@ -5,6 +5,8 @@ const {
   existsInMediaCollection,
   getNumberOfRelevantFiles,
 } = require("./media-collections");
+const { compressFile } = require("./compress-file");
+const { fileToCollection } = require("./files-to-anki-collection");
 
 dotenv.config();
 
@@ -21,46 +23,53 @@ const videosInCollection = fs.readdirSync(
 const preEdittedFilePath =
   process.env.DESKTOP_PATH + "/" + `${videoFolderName}`;
 
-const getNewFileName = (orginalPathToArr, numberOfVideos) => {
-  const newPath = orginalPathToArr
-    .splice(0, orginalPathToArr.length - 1)
+const getNewFileName = (orginalPathToFileArr, numberOfVideos) => {
+  const newPath = orginalPathToFileArr
+    .splice(0, orginalPathToFileArr.length - 1)
     .join("/");
   const newVideoIndex =
     numberOfVideos < 10 ? "0" + numberOfVideos : numberOfVideos;
-  const newFilename = videoFolderName + "-" + newVideoIndex + ".webm";
-  return `${newPath}/${newFilename}`;
+  const newFilename = folderRegex + "-" + newVideoIndex + ".webm";
+  return [`${newPath}/${newFilename}`, newFilename];
 };
 
 chokidar
   .watch(preEdittedFilePath, { ignoreInitial: true })
-  .on("add", (event, _) => {
+  .on("add", async (event, _) => {
     // regex check. Count up from there
     const numberOfRelevantFiles = getNumberOfRelevantFiles(
       folderRegex,
       videosInCollection
     );
-    const renameIndex = numberOfRelevantFiles + 1;
+
+    const renameIndex = numberOfRelevantFiles + 1; // pass count up from flag?
     // check if it exists in collections
-    const orginalPathToArr = event.split("/");
+    const orginalPathToFileArr = event.split("/");
 
-    const completeRenamedFile = getNewFileName(orginalPathToArr, renameIndex);
-
-    const fileInCollection = existsInMediaCollection(
-      completeRenamedFile,
-      videosInCollection
+    const [completeRenamedFilePath, videoFileName] = getNewFileName(
+      orginalPathToFileArr,
+      renameIndex
     );
 
-    console.log("numberOfRelevantFiles:", numberOfRelevantFiles);
-    console.log("renameIndex:", renameIndex);
-    console.log("orginalPathToArr:", orginalPathToArr);
-    console.log("completeRenamedFile:", completeRenamedFile);
-    console.log("fileInCollection:", fileInCollection);
+    const fileInCollection = existsInMediaCollection(
+      completeRenamedFilePath,
+      videosInCollection
+    );
 
     if (fileInCollection) {
       return;
     }
 
-    // fs.rename(event, completeRenamedFile, function (err) {
-    //   if (err) console.log("ERROR: " + err);
-    // });
+    const eventName = event.replace(" ", "").replace("(", "").replace(")", "");
+    console.log("eventName: ", eventName);
+    console.log("videoFileName: ", videoFileName);
+    try {
+      await fs.rename(event, eventName, function (err) {
+        if (err) console.log("ERROR: " + err);
+      });
+      await compressFile(event, completeRenamedFilePath);
+      await fileToCollection(completeRenamedFilePath, videoFileName);
+    } catch (error) {
+      console.log("error: ", error);
+    }
   });
