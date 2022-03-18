@@ -7,6 +7,7 @@ const {
 } = require("./media-collections");
 const { compressFile } = require("./compress-file");
 const { fileToCollection } = require("./files-to-anki-collection");
+const { renameFile } = require("./rename-file");
 
 dotenv.config();
 
@@ -35,7 +36,7 @@ const getNewFileName = (orginalPathToFileArr, numberOfVideos) => {
 
 chokidar
   .watch(preEdittedFilePath, { ignoreInitial: true })
-  .on("add", async (event, _) => {
+  .on("add", async (event) => {
     // regex check. Count up from there
     const numberOfRelevantFiles = getNumberOfRelevantFiles(
       folderRegex,
@@ -43,9 +44,9 @@ chokidar
     );
 
     const renameIndex = numberOfRelevantFiles + 1; // pass count up from flag?
+
     // check if it exists in collections
     const orginalPathToFileArr = event.split("/");
-
     const [completeRenamedFilePath, videoFileName] = getNewFileName(
       orginalPathToFileArr,
       renameIndex
@@ -57,16 +58,14 @@ chokidar
     );
 
     if (fileInCollection) {
+      console.log("File already exists in collection");
       return;
     }
 
     const eventName = event.replace(" ", "").replace("(", "").replace(")", "");
-    console.log("eventName: ", eventName);
-    console.log("videoFileName: ", videoFileName);
+
     try {
-      await fs.rename(event, eventName, function (err) {
-        if (err) console.log("ERROR: " + err);
-      });
+      await renameFile(event, eventName);
       await compressFile(event, completeRenamedFilePath);
       await fileToCollection(completeRenamedFilePath, videoFileName);
     } catch (error) {
