@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chokidar": "^3.5.3",
     "dotenv": "^16.0.0",
     "ffmpeg": "^0.0.4",
     "hidefile": "^3.0.0",

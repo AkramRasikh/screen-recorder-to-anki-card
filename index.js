@@ -1,6 +1,5 @@
 const dotenv = require("dotenv");
 const fs = require("fs");
-const chokidar = require("chokidar");
 const {
   existsInMediaCollection,
   getNumberOfRelevantFiles,
