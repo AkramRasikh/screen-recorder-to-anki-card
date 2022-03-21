@@ -6,7 +6,7 @@ const fileToCollection = async (absoluteVideoPath, video) => {
     fs.copyFile(absoluteVideoPath, collectionPath, (err) => {
       if (err) {
         console.log("Error Found with: ", video, err);
-        reject();
+        reject("Error Found with: ", video, err);
       } else {
         console.log("\nFile Contents of copied_file to collection:", video);
         resolve();

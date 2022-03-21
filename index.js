@@ -1,14 +1,8 @@
 const dotenv = require("dotenv");
 const fs = require("fs");
-const {
-  existsInMediaCollection,
-  getNumberOfRelevantFiles,
-} = require("./media-collections");
+const { getNumberOfRelevantFiles } = require("./media-collections");
 const { compressFile } = require("./compress-file");
-const {
-  fileToCollection,
-  copyFileTing,
-} = require("./files-to-anki-collection");
+const { fileToCollection } = require("./files-to-anki-collection");
 const { renameFile } = require("./rename-file");
 const { deleteFile } = require("./delete-file");
 
@@ -24,12 +18,6 @@ if (!videoFolderName || !folderRegex) {
 const preEdittedFilePath =
   process.env.DESKTOP_PATH + "/" + `${videoFolderName}`;
 
-const postRename =
-  process.env.DESKTOP_PATH + `/${videoFolderName}` + "/editted";
-
-const renamePath =
-  process.env.DESKTOP_PATH + `/${videoFolderName}` + "/renamed";
-
 const getNewFileName = (orginalPathToFileArr, numberOfVideos) => {
   const newPath = orginalPathToFileArr
     .splice(0, orginalPathToFileArr.length - 1)
@@ -39,43 +27,36 @@ const getNewFileName = (orginalPathToFileArr, numberOfVideos) => {
   const newFilename =
     folderRegex + "-" + newVideoIndex + "-compressed" + ".webm";
 
-  const removeRenamedPath = `${newPath}/editted/${newFilename}`.replace(
-    "renamed/",
-    ""
-  );
-  return [removeRenamedPath, `${newPath}/editted/${newFilename}`, newFilename];
+  const removeRenamedPath = `${newPath}/${newFilename}`;
+  return [removeRenamedPath, newFilename];
 };
 
 fs.watch(preEdittedFilePath, async (_, fileName) => {
+  const filePathToThis = preEdittedFilePath + "/" + fileName;
+  const fileExists = await fs.existsSync(filePathToThis);
+
+  if (!fileExists) {
+    return console.log(
+      "Blocking recursively called file change/rename function"
+    );
+  }
   if (
     fileName.includes(".DS_Store") ||
-    fileName.includes("pre-compress-screen")
+    fileName.includes("pre-compress-screen") ||
+    fileName.includes("compressed")
   ) {
     return console.log("Bloddy .DS sting Or pre-compress-secreen");
   }
 
-  const filePathToThis = process.env.DESKTOP_PATH + "/" + fileName;
-  const foldername = "/renamed/";
   const newFilePath =
     preEdittedFilePath +
-    foldername +
+    "/" +
     fileName
       .replace(" ", "")
       .replace("(", "")
       .replace(")", "")
       .replace("screen", "pre-compress-screen");
 
-  try {
-    await copyFileTing(filePathToThis, newFilePath);
-  } catch (error) {
-    console.log("error: ", error);
-  }
-  return console.log("finished!");
-});
-
-// compress file
-fs.watch(renamePath, async (_, fileName) => {
-  // chokidar.watch(renamePath, { ignoreInitial: true }).on("add", async (event) => {
   const videosInCollection = fs.readdirSync(
     process.env.PATH_ANKI_MEDIA_COLLECTION
   );
@@ -84,105 +65,24 @@ fs.watch(renamePath, async (_, fileName) => {
     videosInCollection
   );
 
-  const renameIndex = numberOfRelevantFiles + 1; // pass count up from flag?
+  const renameIndex = numberOfRelevantFiles + 1;
 
-  console.log("renameIndex in rename: ", renameIndex);
-  // check if it exists in collections
-  const orginalPathToFileArr = renamePath + "/" + fileName;
+  const orginalPathToFileArr = preEdittedFilePath + "/" + fileName;
   const orginalPathToFileArrSplit = orginalPathToFileArr.split("/");
-  const [completeRenamedFilePath] = getNewFileName(
+  const [completeRenamedFilePath, newFilename] = getNewFileName(
     orginalPathToFileArrSplit,
     renameIndex
   );
-  console.log("completeRenamedFilePath: ", completeRenamedFilePath);
 
   try {
-    await compressFile(orginalPathToFileArr, completeRenamedFilePath);
+    const renamedFile = await renameFile(filePathToThis, newFilePath);
+    await compressFile(renamedFile, completeRenamedFilePath);
+    console.log("completeRenamedFilePath: ", completeRenamedFilePath);
+    console.log("newFilename: ", newFilename);
+    await fileToCollection(completeRenamedFilePath, newFilename);
+    await deleteFile(renamedFile);
   } catch (error) {
     console.log("error: ", error);
   }
   return console.log("finished!");
 });
-
-fs.watch(postRename, async (eventType, fileName) => {
-  console.log("eventType: ", eventType);
-  console.log("fileName: ", fileName);
-  const videosInCollection = fs.readdirSync(
-    process.env.PATH_ANKI_MEDIA_COLLECTION
-  );
-  const pathToCheckFileInCollection =
-    process.env.PATH_ANKI_MEDIA_COLLECTION + "/" + fileName;
-  const fileInCollection = existsInMediaCollection(
-    pathToCheckFileInCollection,
-    videosInCollection
-  );
-
-  if (fileInCollection) {
-    return console.log(
-      "File already exists in collection (send to collection)"
-    );
-  }
-  const absolutePathOfThis =
-    process.env.DESKTOP_PATH + "/" + videoFolderName + "/editted/" + fileName;
-  try {
-    await fileToCollection(absolutePathOfThis, fileName);
-  } catch (error) {
-    console.log("error: ", error);
-  }
-  return console.log("finished! (send to collection)");
-});
-
-// // // send to collection
-// chokidar.watch(postRename, { ignoreInitial: true }).on("add", async (event) => {
-// if (event.includes("compressed")) {
-//   return console.log("File already compressed");
-// }
-// const numberOfRelevantFiles = getNumberOfRelevantFiles(
-//   folderRegex,
-//   videosInCollection
-// );
-
-// const renameIndex = numberOfRelevantFiles + 1; // pass count up from flag?
-
-// // check if it exists in collections
-// const orginalPathToFileArr = event.split("/");
-
-// const fileInCollection = existsInMediaCollection(
-//   completeRenamedFilePath,
-//   videosInCollection
-// );
-
-// if (fileInCollection) {
-//   return console.log("File already exists in collection");
-// }
-//   const videoFileNameSplit = event.split("/");
-//   const videoFilename = videoFileNameSplit[videoFileNameSplit.length - 1];
-
-//   console.log("videoFileNameSplit", videoFileNameSplit);
-//   console.log("videoFilename: ", videoFilename);
-//   console.log("postRename event: ", event);
-//   try {
-//     await fileToCollection(event, videoFilename);
-//   } catch (error) {
-//     console.log("error: ", error);
-//   }
-//   return console.log("finished!");
-// });
-
-// Things that need not be here
-
-// const getNewFileNameFinal = (orginalPathToFileArr, numberOfVideos) => {
-//   const newPath = orginalPathToFileArr
-//     .splice(0, orginalPathToFileArr.length - 1)
-//     .join("/");
-//   const newVideoIndex =
-//     numberOfVideos < 10 ? "0" + numberOfVideos : numberOfVideos;
-//   const newFilename =
-//     folderRegex + "-" + newVideoIndex + "-compressed" + ".webm";
-
-//   const removeRenamedPath = `${newPath}/editted/${newFilename}`.replace(
-//     "renamed/",
-//     ""
-//   );
-//   return [removeRenamedPath, `${newPath}/editted/${newFilename}`, newFilename];
-// };

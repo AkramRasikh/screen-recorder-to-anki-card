@@ -8,7 +8,7 @@ const renameFile = async (fileToRename, fileRenameDestination) => {
         reject();
       } else {
         console.log("success (renameFile): ", fileRenameDestination);
-        resolve();
+        resolve(fileRenameDestination);
       }
     });
   });
