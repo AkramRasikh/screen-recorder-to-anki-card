@@ -77,8 +77,6 @@ fs.watch(preEdittedFilePath, async (_, fileName) => {
   try {
     const renamedFile = await renameFile(filePathToThis, newFilePath);
     await compressFile(renamedFile, completeRenamedFilePath);
-    console.log("completeRenamedFilePath: ", completeRenamedFilePath);
-    console.log("newFilename: ", newFilename);
     await fileToCollection(completeRenamedFilePath, newFilename);
     await deleteFile(renamedFile);
   } catch (error) {

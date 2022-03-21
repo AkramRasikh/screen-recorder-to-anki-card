@@ -15,22 +15,6 @@ const fileToCollection = async (absoluteVideoPath, video) => {
   });
 };
 
-const copyFileTing = async (initialPath, destinationPath) => {
-  console.log("destinationPath: ", destinationPath);
-  return await new Promise((resolve, reject) => {
-    fs.copyFile(initialPath, destinationPath, (err) => {
-      if (err) {
-        console.log("Error copying: ", err);
-        reject();
-      } else {
-        console.log("Successfully compied");
-        resolve();
-      }
-    });
-  });
-};
-
 module.exports = {
   fileToCollection,
-  copyFileTing,
 };
