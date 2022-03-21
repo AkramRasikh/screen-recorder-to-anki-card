@@ -75,8 +75,8 @@ fs.watch(preEdittedFilePath, async (_, fileName) => {
 });
 
 // compress file
-chokidar.watch(renamePath, { ignoreInitial: true }).on("add", async (event) => {
-  console.log("event: rename event", event);
+fs.watch(renamePath, async (_, fileName) => {
+  // chokidar.watch(renamePath, { ignoreInitial: true }).on("add", async (event) => {
   const videosInCollection = fs.readdirSync(
     process.env.PATH_ANKI_MEDIA_COLLECTION
   );
@@ -89,15 +89,16 @@ chokidar.watch(renamePath, { ignoreInitial: true }).on("add", async (event) => {
 
   console.log("renameIndex in rename: ", renameIndex);
   // check if it exists in collections
-  const orginalPathToFileArr = event.split("/");
+  const orginalPathToFileArr = renamePath + "/" + fileName;
+  const orginalPathToFileArrSplit = orginalPathToFileArr.split("/");
   const [completeRenamedFilePath] = getNewFileName(
-    orginalPathToFileArr,
+    orginalPathToFileArrSplit,
     renameIndex
   );
   console.log("completeRenamedFilePath: ", completeRenamedFilePath);
 
   try {
-    await compressFile(event, completeRenamedFilePath);
+    await compressFile(orginalPathToFileArr, completeRenamedFilePath);
   } catch (error) {
     console.log("error: ", error);
   }
