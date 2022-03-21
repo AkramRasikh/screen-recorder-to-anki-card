@@ -47,52 +47,32 @@ const getNewFileName = (orginalPathToFileArr, numberOfVideos) => {
   return [removeRenamedPath, `${newPath}/editted/${newFilename}`, newFilename];
 };
 
-const getNewFileNameFinal = (orginalPathToFileArr, numberOfVideos) => {
-  const newPath = orginalPathToFileArr
-    .splice(0, orginalPathToFileArr.length - 1)
-    .join("/");
-  const newVideoIndex =
-    numberOfVideos < 10 ? "0" + numberOfVideos : numberOfVideos;
-  const newFilename =
-    folderRegex + "-" + newVideoIndex + "-compressed" + ".webm";
+fs.watch(preEdittedFilePath, async (_, fileName) => {
+  if (
+    fileName.includes(".DS_Store") ||
+    fileName.includes("pre-compress-screen")
+  ) {
+    return console.log("Bloddy .DS sting Or pre-compress-secreen");
+  }
 
-  const removeRenamedPath = `${newPath}/editted/${newFilename}`.replace(
-    "renamed/",
-    ""
-  );
-  return [removeRenamedPath, `${newPath}/editted/${newFilename}`, newFilename];
-};
-
-// rename
-chokidar
-  .watch(preEdittedFilePath, { ignoreInitial: true })
-  .on("add", async (event) => {
-    if (event.includes(".DS_Store") || event.includes("pre-compress-screen")) {
-      return console.log("Bloddy .DS sting Or pre-compress-secreen");
-    }
-
-    const eventSplit = event.split("/");
-    const filename = eventSplit[eventSplit.length - 1];
-    const foldername = "/renamed/";
-    const newFilePath = (
-      eventSplit.splice(0, eventSplit.length - 1).join("/") +
-      foldername +
-      filename
-    )
+  const filePathToThis = process.env.DESKTOP_PATH + "/" + fileName;
+  const foldername = "/renamed/";
+  const newFilePath =
+    preEdittedFilePath +
+    foldername +
+    fileName
       .replace(" ", "")
       .replace("(", "")
       .replace(")", "")
       .replace("screen", "pre-compress-screen");
 
-    // console.log("newFilePathL ", newFilePath);
-
-    try {
-      await copyFileTing(event, newFilePath);
-    } catch (error) {
-      console.log("error: ", error);
-    }
-    return console.log("finished!");
-  });
+  try {
+    await copyFileTing(filePathToThis, newFilePath);
+  } catch (error) {
+    console.log("error: ", error);
+  }
+  return console.log("finished!");
+});
 
 // compress file
 chokidar.watch(renamePath, { ignoreInitial: true }).on("add", async (event) => {
@@ -188,3 +168,21 @@ fs.watch(postRename, async (eventType, fileName) => {
 //   }
 //   return console.log("finished!");
 // });
+
+// Things that need not be here
+
+// const getNewFileNameFinal = (orginalPathToFileArr, numberOfVideos) => {
+//   const newPath = orginalPathToFileArr
+//     .splice(0, orginalPathToFileArr.length - 1)
+//     .join("/");
+//   const newVideoIndex =
+//     numberOfVideos < 10 ? "0" + numberOfVideos : numberOfVideos;
+//   const newFilename =
+//     folderRegex + "-" + newVideoIndex + "-compressed" + ".webm";
+
+//   const removeRenamedPath = `${newPath}/editted/${newFilename}`.replace(
+//     "renamed/",
+//     ""
+//   );
+//   return [removeRenamedPath, `${newPath}/editted/${newFilename}`, newFilename];
+// };
